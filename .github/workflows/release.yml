@@ -1,0 +1,29 @@
+name: Publish Package
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  id-token: write # Required for OIDC
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: release
+    steps:
+      - uses: actions/checkout@v4
+      - uses: volta-cli/action@v4
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+      - name: Read version and publish
+        run: |
+          VERSION=$(jq -r .version package.json)
+          if [[ "$VERSION" == *alpha* || "$VERSION" == *beta* ]]; then
+            npm publish --tag beta
+          else
+            npm publish
+          fi
