@@ -70,7 +70,7 @@ describe("nz-imagery", () => {
   // const folder = "nz-imagery";
 
   it("should generate reprojection mesh", () => {
-    const baseFname = "250-25_GeoTifv1-05";
+    const baseFname = "linz_250-25_GeoTifv1-05";
     const fixturePath = join(FIXTURES_DIR, `${baseFname}.json`);
 
     console.time(`Create reprojector for ${baseFname}`);
