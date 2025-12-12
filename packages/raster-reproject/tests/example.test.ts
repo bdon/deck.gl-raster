@@ -1,11 +1,18 @@
 import { describe, it } from "vitest";
-import { join } from "path";
-import { reprojection } from "@developmentseed/raster-reproject";
+import { join, dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import {
+  RasterReprojector,
+  applyAffine,
+  invertGeoTransform,
+} from "@developmentseed/raster-reproject";
 import { readFileSync, writeFileSync } from "fs";
 import type { PROJJSONDefinition } from "proj4/dist/lib/core";
 import proj4 from "proj4";
 
-const FIXTURES_DIR = join(__dirname, "..", "..", "..", "fixtures");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const FIXTURES_DIR = resolve(join(__dirname, "..", "..", "..", "fixtures"));
 
 type FixtureJSON = {
   width: number;
@@ -23,17 +30,15 @@ function fromGeoTransform(
   pixelToInputCRS: (x: number, y: number) => [number, number];
   inputCRSToPixel: (x: number, y: number) => [number, number];
 } {
-  const inverseGeotransform =
-    reprojection.affine.invertGeoTransform(geotransform);
+  const inverseGeotransform = invertGeoTransform(geotransform);
   return {
-    pixelToInputCRS: (x: number, y: number) =>
-      reprojection.affine.applyAffine(x, y, geotransform),
+    pixelToInputCRS: (x: number, y: number) => applyAffine(x, y, geotransform),
     inputCRSToPixel: (x: number, y: number) =>
-      reprojection.affine.applyAffine(x, y, inverseGeotransform),
+      applyAffine(x, y, inverseGeotransform),
   };
 }
 
-function parseFixture(fixturePath: string): reprojection.RasterReprojector {
+function parseFixture(fixturePath: string): RasterReprojector {
   const {
     width,
     height,
@@ -72,10 +77,10 @@ function parseFixture(fixturePath: string): reprojection.RasterReprojector {
     inverseReproject: (x: number, y: number) =>
       converter.inverse<[number, number]>([x, y], false),
   };
-  return new reprojection.RasterReprojector(reprojectionFns, width, height);
+  return new RasterReprojector(reprojectionFns, width, height);
 }
 
-function serializeMesh(reprojector: reprojection.RasterReprojector) {
+function serializeMesh(reprojector: RasterReprojector) {
   const mesh = {
     indices: reprojector.triangles,
     positions: reprojector.exactOutputPositions,
