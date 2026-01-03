@@ -1,28 +1,29 @@
 import type { DeckProps } from "@deck.gl/core";
 import { MapboxOverlay } from "@deck.gl/mapbox";
-import type { Device, Texture } from "@luma.gl/core";
 import {
   COGLayer,
   parseColormap,
   proj,
 } from "@developmentseed/deck.gl-geotiff";
+import type { RasterModule } from "@developmentseed/deck.gl-raster";
+import {
+  Colormap,
+  CreateTexture,
+  FilterNoDataVal,
+} from "@developmentseed/deck.gl-raster";
+import type { Device, Texture } from "@luma.gl/core";
 import type {
   GeoTIFF,
   GeoTIFFImage,
   TypedArrayArrayWithDimensions,
 } from "geotiff";
-import {
-  Colormap,
-  CreateTexture,
-  FilterNoDataVal,
-  RasterModule,
-} from "@developmentseed/deck.gl-raster";
 import { fromUrl, Pool } from "geotiff";
 import { toProj4 } from "geotiff-geokeys-to-proj4";
 import "maplibre-gl/dist/maplibre-gl.css";
 import proj4 from "proj4";
 import { useEffect, useRef, useState } from "react";
-import { Map, useControl, type MapRef } from "react-map-gl/maplibre";
+import type { MapRef } from "react-map-gl/maplibre";
+import { Map as MaplibreMap, useControl } from "react-map-gl/maplibre";
 
 window.proj4 = proj4;
 
@@ -60,7 +61,7 @@ async function getTileData(
   const { device, window, signal, pool } = options;
 
   const {
-    [0]: data,
+    0: data,
     width,
     height,
   } = (await image.readRasters({
@@ -229,7 +230,7 @@ export default function App() {
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
-      <Map
+      <MaplibreMap
         ref={mapRef}
         initialViewState={{
           longitude: 0,
@@ -245,7 +246,7 @@ export default function App() {
           interleaved
           onDeviceInitialized={(device) => setDevice(device)}
         />
-      </Map>
+      </MaplibreMap>
 
       {/* UI Overlay Container */}
       <div
@@ -324,25 +325,6 @@ export default function App() {
               marginTop: "12px",
             }}
           >
-            {/* <label
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                fontSize: "14px",
-                cursor: "pointer",
-                marginBottom: "12px",
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={renderAsTiled}
-                onChange={(e) => setRenderAsTiled(e.target.checked)}
-                style={{ cursor: "pointer" }}
-              />
-              <span>Render as tiled</span>
-            </label> */}
-
             <label
               style={{
                 display: "flex",
@@ -373,16 +355,18 @@ export default function App() {
                   }}
                 >
                   Debug Opacity: {debugOpacity.toFixed(2)}
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={debugOpacity}
+                    onChange={(e) =>
+                      setDebugOpacity(parseFloat(e.target.value))
+                    }
+                    style={{ width: "100%", cursor: "pointer" }}
+                  />
                 </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.01"
-                  value={debugOpacity}
-                  onChange={(e) => setDebugOpacity(parseFloat(e.target.value))}
-                  style={{ width: "100%", cursor: "pointer" }}
-                />
               </div>
             )}
           </div>

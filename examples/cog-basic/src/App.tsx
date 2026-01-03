@@ -2,14 +2,15 @@ import type { DeckProps } from "@deck.gl/core";
 import { MapboxOverlay } from "@deck.gl/mapbox";
 import { COGLayer, loadRgbImage, proj } from "@developmentseed/deck.gl-geotiff";
 import { CreateTexture } from "@developmentseed/deck.gl-raster";
-import { Device, Texture } from "@luma.gl/core";
+import type { Device, Texture } from "@luma.gl/core";
 import type { GeoTIFFImage } from "geotiff";
 import { Pool } from "geotiff";
 import { toProj4 } from "geotiff-geokeys-to-proj4";
 import "maplibre-gl/dist/maplibre-gl.css";
 import proj4 from "proj4";
 import { useRef, useState } from "react";
-import { Map, useControl, type MapRef } from "react-map-gl/maplibre";
+import type { MapRef } from "react-map-gl/maplibre";
+import { Map as MaplibreMap, useControl } from "react-map-gl/maplibre";
 
 window.proj4 = proj4;
 
@@ -92,39 +93,35 @@ export default function App() {
   const [debugOpacity, setDebugOpacity] = useState(0.25);
   const [pool] = useState<Pool>(new Pool());
 
-  const layers = true
-    ? [
-        new COGLayer({
-          id: "cog-layer",
-          geotiff: COG_URL,
-          maxError: 0.125,
-          debug,
-          debugOpacity,
-          geoKeysParser,
-          pool,
-          getTileData,
-          renderTile,
-          onGeoTIFFLoad: (_tiff, options) => {
-            const { west, south, east, north } = options.geographicBounds;
-            mapRef.current?.fitBounds(
-              [
-                [west, south],
-                [east, north],
-              ],
-              {
-                padding: 40,
-                duration: 1000,
-              },
-            );
-          },
-          beforeId: "boundary_country_outline",
-        }),
-      ]
-    : [];
+  const cog_layer = new COGLayer({
+    id: "cog-layer",
+    geotiff: COG_URL,
+    maxError: 0.125,
+    debug,
+    debugOpacity,
+    geoKeysParser,
+    pool,
+    getTileData,
+    renderTile,
+    onGeoTIFFLoad: (_tiff, options) => {
+      const { west, south, east, north } = options.geographicBounds;
+      mapRef.current?.fitBounds(
+        [
+          [west, south],
+          [east, north],
+        ],
+        {
+          padding: 40,
+          duration: 1000,
+        },
+      );
+    },
+    beforeId: "boundary_country_outline",
+  });
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
-      <Map
+      <MaplibreMap
         ref={mapRef}
         initialViewState={{
           longitude: 0,
@@ -135,8 +132,8 @@ export default function App() {
         }}
         mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
       >
-        <DeckGLOverlay layers={layers} interleaved />
-      </Map>
+        <DeckGLOverlay layers={[cog_layer]} interleaved />
+      </MaplibreMap>
 
       {/* UI Overlay Container */}
       <div
@@ -208,16 +205,18 @@ export default function App() {
                   }}
                 >
                   Debug Opacity: {debugOpacity.toFixed(2)}
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={debugOpacity}
+                    onChange={(e) =>
+                      setDebugOpacity(parseFloat(e.target.value))
+                    }
+                    style={{ width: "100%", cursor: "pointer" }}
+                  />
                 </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.01"
-                  value={debugOpacity}
-                  onChange={(e) => setDebugOpacity(parseFloat(e.target.value))}
-                  style={{ width: "100%", cursor: "pointer" }}
-                />
               </div>
             )}
           </div>
