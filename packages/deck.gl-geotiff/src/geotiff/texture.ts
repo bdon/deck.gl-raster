@@ -1,6 +1,6 @@
 import type { TextureFormat, TextureProps } from "@luma.gl/core";
 import type { GeoTIFFImage, TypedArray } from "geotiff";
-import type { ImageFileDirectory } from "./geotiff-types";
+import type { ImageFileDirectory } from "./types";
 
 /**
  * Infers texture properties from a GeoTIFF image and its associated data.
@@ -21,7 +21,6 @@ export function createTextureProps(
 
   return {
     data,
-    dimension: "2d",
     format: textureFormat,
     width: options.width,
     height: options.height,
@@ -31,7 +30,7 @@ export function createTextureProps(
 /**
  * Infer the TextureFormat given values from GeoTIFF tags.
  */
-function inferTextureFormat(
+export function inferTextureFormat(
   samplesPerPixel: number,
   bitsPerSample: Uint16Array,
   sampleFormat: Uint16Array,
@@ -109,7 +108,7 @@ function inferScalarKind(sampleFormat: Uint16Array): ScalarKind {
 
   switch (first) {
     case 1:
-      return "uint";
+      return "unorm";
     case 2:
       return "sint";
     case 3:

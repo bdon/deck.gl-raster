@@ -9,7 +9,7 @@ import {
   fetchGeoTIFF,
   getGeographicBounds,
   loadRgbImage,
-} from "./geotiff.js";
+} from "./geotiff/geotiff.js";
 import { extractGeotiffReprojectors } from "./geotiff-reprojection.js";
 import type { GeoKeysParser, ProjectionInfo } from "./proj.js";
 import { epsgIoGeoKeyParser } from "./proj.js";

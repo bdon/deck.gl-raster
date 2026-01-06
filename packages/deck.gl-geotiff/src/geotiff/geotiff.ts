@@ -80,7 +80,7 @@ export async function loadRgbImage(
  * Only supports input arrays with 3 (RGB) or 4 (RGBA) channels. If the input is
  * already RGBA, it is returned unchanged.
  */
-function addAlphaChannel(rgbImage: TypedArrayWithDimensions): ImageData {
+export function addAlphaChannel(rgbImage: TypedArrayWithDimensions): ImageData {
   const { height, width } = rgbImage;
 
   if (rgbImage.length === height * width * 4) {
@@ -194,4 +194,21 @@ export function getGeographicBounds(
 
   // Return bounds in MapLibre format: [[west, south], [east, north]]
   return { west, south, east, north };
+}
+
+/** Parse the GDAL_NODATA TIFF tag into a number. */
+export function parseGDALNoData(
+  GDAL_NODATA: string | undefined,
+): number | null {
+  if (!GDAL_NODATA) {
+    return null;
+  }
+
+  // Remove trailing null character if present
+  const noDataString =
+    GDAL_NODATA?.[GDAL_NODATA?.length - 1] === "\x00"
+      ? GDAL_NODATA.slice(0, -1)
+      : GDAL_NODATA;
+
+  return noDataString?.length > 0 ? parseFloat(noDataString) : null;
 }
