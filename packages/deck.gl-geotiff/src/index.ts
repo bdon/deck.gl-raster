@@ -16,3 +16,7 @@ export {
   MosaicTileset2D,
 } from "./mosaic-layer/mosaic-tileset-2d";
 export * as proj from "./proj.js";
+
+import { __TEST_EXPORTS as cogTileMatrixSetTestExports } from "./cog-tile-matrix-set.js";
+
+export const __TEST_EXPORTS = { ...cogTileMatrixSetTestExports };

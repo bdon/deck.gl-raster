@@ -133,7 +133,7 @@ function metersPerUnit(
   parsedCrs: ProjectionDefinition,
   crsUnit?: SupportedCrsUnit,
 ): number {
-  const unit = crsUnit || parsedCrs.units;
+  const unit = (crsUnit || parsedCrs.units)?.toLowerCase();
   switch (unit) {
     case "m":
     case "metre":
@@ -142,7 +142,7 @@ function metersPerUnit(
       return 1;
     case "foot":
       return 0.3048;
-    case "US survey foot":
+    case "us survey foot":
       return 1200 / 3937;
   }
 
@@ -260,3 +260,7 @@ function computeWgs84BoundingBox(
     upperRight: [maxLon, maxLat],
   };
 }
+
+export const __TEST_EXPORTS = {
+  metersPerUnit,
+};

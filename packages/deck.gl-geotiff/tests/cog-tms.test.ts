@@ -1,6 +1,6 @@
 import { fromUrl } from "geotiff";
 import { describe, expect, it } from "vitest";
-import { parseCOGTileMatrixSet } from "../src";
+import { parseCOGTileMatrixSet, __TEST_EXPORTS as TestExports } from "../src";
 import { epsgIoGeoKeyParser } from "../src/proj";
 
 describe("create TileMatrixSet from COG", () => {
@@ -83,5 +83,17 @@ describe("create TileMatrixSet from COG", () => {
     ];
 
     expect(tms.tileMatrices).toStrictEqual(expectedTileMatrices);
+  });
+});
+
+describe("metersPerUnit", () => {
+  it("handles lowercase us survey foot", () => {
+    // @ts-expect-error testing case insensitivity with standard casing
+    expect(TestExports.metersPerUnit({}, "us survey foot")).toBe(1200 / 3937);
+  });
+
+  it("handles mixed case US Survey Foot", () => {
+    // @ts-expect-error testing case insensitivity with non-standard casing
+    expect(TestExports.metersPerUnit({}, "US Survey Foot")).toBe(1200 / 3937);
   });
 });
